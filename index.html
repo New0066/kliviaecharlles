@@ -68,6 +68,7 @@
             transition: all 0.3s ease;
             flex: 1;
             min-width: 120px;
+            touch-action: manipulation; /* Melhoria para mobile */
         }
 
         #sim {
@@ -80,6 +81,7 @@
             background: linear-gradient(135deg, #666, #888);
             color: white;
             position: relative;
+            transition: transform 0.3s; /* Nova transição */
         }
 
         /* ===== ANIMAÇÕES ===== */
@@ -109,9 +111,9 @@
             }
 
             button {
-                padding: 10px 25px;
+                padding: 15px 40px; /* Aumentado para touch */
+                min-width: 140px;
                 font-size: 1em;
-                min-width: 100px;
             }
 
             img {
@@ -119,13 +121,9 @@
             }
         }
 
-        @media (max-width: 320px) {
-            .painel {
-                padding: 15px;
-            }
-            
-            button {
-                width: 100%;
+        @media (hover: none) and (pointer: coarse) {
+            #nao {
+                min-width: 150px; /* Tamanho maior para dedos */
             }
         }
     </style>
@@ -144,35 +142,44 @@
             <a href="https://youtu.be/ykB-bAD0zeI?si=pUYt9asgl1f9xLc6" target="_blank">
                 <button id="sim">Sim!</button>
             </a>
-            <button id="nao" onmouseenter="fuja()">Não!</button>
+            <button id="nao">Não!</button>
         </div>
     </div>
 
     <script>
-        // Sistema otimizado para mobile
+        // Sistema híbrido mobile/desktop
         let cooldown = false;
-        
-        function fuja() {
+        const btnNao = document.getElementById('nao');
+        const margemSeguranca = 30;
+
+        function moverBotao() {
             if(cooldown) return;
             
-            const btnNao = document.getElementById('nao');
             const painel = document.querySelector('.painel');
+            const painelRect = painel.getBoundingClientRect();
             
-            // Cálculo responsivo
-            const areaSegura = {
-                x: painel.offsetWidth - btnNao.offsetWidth - 30,
-                y: painel.offsetHeight - btnNao.offsetHeight - 30
-            };
-            
-            // Movimento táctil
-            btnNao.style.transform = `translate(
-                ${Math.random() * areaSegura.x}px,
-                ${Math.random() * areaSegura.y}px
+            // Cálculo preciso para área visível
+            const maxX = painelRect.width - btnNao.offsetWidth - margemSeguranca;
+            const maxY = painelRect.height - btnNao.offsetHeight - margemSeguranca;
+
+            // Movimento com translate3d para performance
+            btnNao.style.transform = `translate3d(
+                ${Math.random() * maxX}px,
+                ${Math.random() * maxY}px,
+                0
             )`;
             
+            // Reset suave após 0.6s
             cooldown = true;
-            setTimeout(() => cooldown = false, 500);
+            setTimeout(() => {
+                btnNao.style.transform = 'translate3d(0,0,0)';
+                cooldown = false;
+            }, 600);
         }
+
+        // Eventos para todos os dispositivos
+        btnNao.addEventListener('touchstart', moverBotao); // Mobile
+        btnNao.addEventListener('mouseenter', moverBotao); // Desktop
     </script>
 </body>
 </html>
